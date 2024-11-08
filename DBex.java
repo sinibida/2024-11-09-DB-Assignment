@@ -11,7 +11,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -29,8 +33,54 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-class MyJFrame extends JFrame {
+class SQLRunner {
+  private Connection connection;
 
+  private SQLRunner() {
+  }
+
+  public static SQLRunner getInstance() throws ClassNotFoundException, SQLException {
+    SQLRunner ret = new SQLRunner();
+    Class.forName("oracle.jdbc.driver.OracleDriver");
+    ret.connection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.64.2:1521:xe", "juna", "1234");
+    return ret;
+  }
+
+  /**
+   * 
+   * @param statement
+   * @return ResultSet or Null (on SQLException)
+   */
+  public ResultSet runQuery(String statement) throws SQLException {
+    try {
+      Statement statementClass = connection.createStatement();
+      return statementClass.executeQuery(statement);
+    } catch (SQLException e) {
+      System.err.println("SQL Execution Failed: " + statement);
+      throw e;
+    }
+  }
+
+  // https://stackoverflow.com/a/49236593
+  public int runUpdate(String statement) throws SQLException {
+    try {
+      Statement statementClass = connection.createStatement();
+      return statementClass.executeUpdate(statement);
+    } catch (SQLException e) {
+      System.err.println("SQL Execution Failed: " + statement);
+      throw e;
+    }
+  }
+
+  public void dispose() {
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      System.err.println("Error on disposal");
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
 }
 
 class DBex extends JFrame {
@@ -53,23 +103,7 @@ class DBex extends JFrame {
     });
   }
 
-  private void connect() {
-    try {
-      runner = SQLRunner.getInstance();
-    } catch (ClassNotFoundException e) {
-      System.out.println("Error: JDBC Not Found.");
-    } catch (SQLException e) {
-      System.out.println("SQL Fail");
-      System.out.println(e);
-    } finally {
-    }
-  }
-
-  private JButton EventButton(String label, ActionListener l) {
-    JButton button = new JButton(label);
-    button.addActionListener(l);
-    return button;
-  }
+  // Components
 
   private void showDialog(String title, String message) {
     JDialog dialog = new JDialog(this, title, true);
@@ -85,6 +119,26 @@ class DBex extends JFrame {
     dialog.add(label, BorderLayout.CENTER);
 
     dialog.setVisible(true);
+  }
+
+  private JButton EventButton(String label, ActionListener l) {
+    JButton button = new JButton(label);
+    button.addActionListener(l);
+    return button;
+  }
+
+  // Feature Methods
+
+  private void connect() {
+    try {
+      runner = SQLRunner.getInstance();
+    } catch (ClassNotFoundException e) {
+      System.out.println("Error: JDBC Not Found.");
+    } catch (SQLException e) {
+      System.out.println("SQL Fail");
+      System.out.println(e);
+    } finally {
+    }
   }
 
   private boolean isQuery(String statement) {
@@ -170,6 +224,8 @@ class DBex extends JFrame {
     }
   }
 
+  // Panels
+
   private JLabel BottomPanelHeader(String text) {
     JLabel label = new JLabel("[ " + text + " ]");
     label.setAlignmentX(0.5f);
@@ -210,7 +266,8 @@ class DBex extends JFrame {
       showStatementFieldResult();
     }));
     buttonRow2.add(EventButton("삽입", (event) -> {
-      statementField.setText("INSERT INTO Employee VALUES (4, 'New', 'E.', 'M''ployee', '1990-12-31', 'female', '서울', 25000, 1, NULL)");
+      statementField.setText(
+          "INSERT INTO Employee VALUES (4, 'New', 'E.', 'M''ployee', '1990-12-31', 'female', '서울', 25000, 1, NULL)");
       runStatementField();
     }));
     buttonRow2.add(EventButton("삭제", (event) -> {
@@ -267,12 +324,14 @@ class DBex extends JFrame {
     return ret;
   }
 
+  // Main
+
   private void init() {
     initTable();
     initStatementField();
 
     setTitle("Database Test");
-    setSize(1000, 400);
+    setSize(1000, 600);
     setLocationRelativeTo(null);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
