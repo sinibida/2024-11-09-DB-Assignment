@@ -23,6 +23,16 @@ class DBex extends JFrame {
     super();
     this.runner = runner;
 
+    // try {
+    //   var result = runner.runStatement("SELECT * FROM tab");
+    //   while(result.next()) {
+    //     System.out.println(result.getString(1));
+    //   }
+    // } catch (SQLException e) {
+    //   // TODO Auto-generated catch block
+    //   e.printStackTrace();
+    // }
+
     init();
   }
 

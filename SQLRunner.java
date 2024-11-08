@@ -15,19 +15,22 @@ public class SQLRunner {
   public static SQLRunner getInstance() throws ClassNotFoundException, SQLException {
     SQLRunner ret = new SQLRunner();
     Class.forName("oracle.jdbc.driver.OracleDriver");
-    ret.connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "juna", "1234");
+    ret.connection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.64.2:1521:xe", "juna", "1234");
     return ret;
   }
 
-  public Optional<ResultSet> runStatement(String statement) {
+  /**
+   * 
+   * @param statement
+   * @return ResultSet or Null (on SQLException)
+   */
+  public ResultSet runStatement(String statement) throws SQLException {
     try {
       Statement statementClass = connection.createStatement();
-      return Optional.of(statementClass.executeQuery("SELECT * FROM tab"));
+      return statementClass.executeQuery("SELECT * FROM tab");
     } catch (SQLException e) {
       System.err.println("SQL Execution Failed: " + statement);
-      e.printStackTrace();
-
-      return Optional.empty();
+      throw e;
     }
   }
 
