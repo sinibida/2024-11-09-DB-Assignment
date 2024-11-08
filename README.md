@@ -1,4 +1,4 @@
-실행 코드 (MacOS 기준)
+# 실행 코드 (MacOS 기준)
 
 ```
 javac DBex.java && java -cp "ojdbc6.jar:." DBex
