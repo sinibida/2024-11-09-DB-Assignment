@@ -34,6 +34,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 class SQLRunner {
+  final static String DB_URL = "jdbc:oracle:thin:@192.168.64.2:1521:xe";
+  final static String DB_USERNAME = "juna";
+  final static String DB_PASSWORD = "1234";
+
   private Connection connection;
 
   private SQLRunner() {
@@ -42,7 +46,7 @@ class SQLRunner {
   public static SQLRunner getInstance() throws ClassNotFoundException, SQLException {
     SQLRunner ret = new SQLRunner();
     Class.forName("oracle.jdbc.driver.OracleDriver");
-    ret.connection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.64.2:1521:xe", "juna", "1234");
+    ret.connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
     return ret;
   }
 
