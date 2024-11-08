@@ -4,7 +4,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Optional;
 
 public class SQLRunner {
   private Connection connection;
@@ -24,10 +23,21 @@ public class SQLRunner {
    * @param statement
    * @return ResultSet or Null (on SQLException)
    */
-  public ResultSet runStatement(String statement) throws SQLException {
+  public ResultSet runQuery(String statement) throws SQLException {
     try {
       Statement statementClass = connection.createStatement();
-      return statementClass.executeQuery("SELECT * FROM tab");
+      return statementClass.executeQuery(statement);
+    } catch (SQLException e) {
+      System.err.println("SQL Execution Failed: " + statement);
+      throw e;
+    }
+  }
+
+  // https://stackoverflow.com/a/49236593
+  public int runUpdate(String statement) throws SQLException {
+    try {
+      Statement statementClass = connection.createStatement();
+      return statementClass.executeUpdate(statement);
     } catch (SQLException e) {
       System.err.println("SQL Execution Failed: " + statement);
       throw e;
